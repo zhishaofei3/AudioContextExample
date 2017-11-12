@@ -56,7 +56,7 @@ export default class WebAudioSound extends EventDispatcher {
 
   play(startTime, loops) {
     startTime = +startTime || 0
-    loops = +loops || 0
+    loops = +loops || 1
 
     if (!this.loaded) {
       console.log('this.loaded == false')
