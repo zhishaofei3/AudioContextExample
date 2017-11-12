@@ -8,7 +8,6 @@ export default class EventDispatcher {
     if (listeners[type].indexOf(listener) === -1) {
       listeners[type].push(listener)
     }
-    console.log('listeners',listeners)
   }
 
   hasEventListener(type, listener) {
@@ -33,7 +32,6 @@ export default class EventDispatcher {
     if (this._listeners === undefined) return
     let listeners = this._listeners
     let listenerArray = listeners[event.type]
-    console.log('listeners', listeners)
     if (listenerArray !== undefined) {
       event.target = this
       let array = listenerArray.slice(0)

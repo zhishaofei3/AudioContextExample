@@ -3,7 +3,6 @@ import WebAudioDecode from './WebAudioDecode'
 import WebAudioEvent from './WebAudioEvent'
 
 export default class WebAudioSoundChannel extends EventDispatcher {
-
   $url = ''
   $loops = 1
   $audioBuffer = null//AudioBuffer
@@ -14,6 +13,7 @@ export default class WebAudioSoundChannel extends EventDispatcher {
   bufferSource = null
   context = WebAudioDecode.ctx
   isStopped = false
+  intervalId = 0
 
   constructor() {
     super()
@@ -26,6 +26,7 @@ export default class WebAudioSoundChannel extends EventDispatcher {
   }
 
   $play() {
+    let _this = this
     console.log('play了', this.$url)
     if (this.isStopped) {
       console.log('this.isStopped')
@@ -42,16 +43,18 @@ export default class WebAudioSoundChannel extends EventDispatcher {
     this.bufferSource = bufferSource
     bufferSource.buffer = this.$audioBuffer
     bufferSource.connect(gain)
-    console.log('context.destination', context.destination)
     gain.connect(context.destination)
-    bufferSource.onended = this.onPlayEnd
+    bufferSource.onended = function () {
+      _this.onPlayEnd()
+    }
 
     this._startTime = Date.now()
-    console.log('this.gain.gain.value', gain.gain.value)
     gain.gain.value = this._volume
     bufferSource.start(0, this.$startTime)
-    console.log('this.$startTime', this.$startTime)
-    console.log('bufferSource', bufferSource)
+
+    this.intervalId = setInterval(() => {
+      this.dispatchEvent({type: WebAudioEvent.SOUND_PROGRESS, position: this.position});
+    }, 500)
   }
 
   stop() {
@@ -69,6 +72,11 @@ export default class WebAudioSoundChannel extends EventDispatcher {
       this.$audioBuffer = null
     }
 
+    if(this.intervalId) {
+      clearInterval(this.intervalId)
+      this.intervalId = 0
+    }
+
     if (!this.isStopped) {
       //sys.$popSoundChannel(this);
     }
@@ -77,6 +85,7 @@ export default class WebAudioSoundChannel extends EventDispatcher {
   }
 
   onPlayEnd() {
+    console.log('$loops', this.$loops)
     if (this.$loops === 1) {
       this.stop()
       this.dispatchEvent({type: WebAudioEvent.SOUND_COMPLETE});

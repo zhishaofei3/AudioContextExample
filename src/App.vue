@@ -26,8 +26,7 @@
         loaded: false,
         volume: 1,
         position: 0,
-        length: 0,
-        intervalId: 0
+        length: 0
       }
     },
     created () {
@@ -47,7 +46,7 @@
         let position = 0 || this.position
         this.soundChannel = this.sound.play(position)
         this.soundChannel.addEventListener(WebAudioEvent.SOUND_COMPLETE, this.onSoundComplete)
-        this.intervalId = setInterval(this.onProgress, 500)
+        this.soundChannel.addEventListener(WebAudioEvent.SOUND_PROGRESS, this.onSoundProgress)
       },
       pause(){
         if (!this.soundChannel) {
@@ -77,14 +76,10 @@
       onSoundComplete(e) {
         console.log('onSoundComplete', e)
         this.soundChannel.removeEventListener(WebAudioEvent.SOUND_COMPLETE, this.onSoundComplete)
-        this.clearInterval()
+        this.soundChannel.removeEventListener(WebAudioEvent.SOUND_PROGRESS, this.onSoundProgress)
       },
-      onProgress() {
-        this.position = this.soundChannel.position
-      },
-      clearInterval() {
-        clearInterval(this.intervalId)
-        this.intervalId = 0
+      onSoundProgress(e) {
+        this.position = e.position
       }
     },
     watch: {
