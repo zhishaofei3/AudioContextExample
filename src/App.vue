@@ -74,7 +74,6 @@
         this.sound.removeEventListener(WebAudioEvent.IO_ERROR, this.onSoundLoadError)
       },
       onSoundComplete(e) {
-        console.log('onSoundComplete', e)
         this.soundChannel.removeEventListener(WebAudioEvent.SOUND_COMPLETE, this.onSoundComplete)
         this.soundChannel.removeEventListener(WebAudioEvent.SOUND_PROGRESS, this.onSoundProgress)
       },

@@ -85,7 +85,6 @@ export default class WebAudioSoundChannel extends EventDispatcher {
   }
 
   onPlayEnd() {
-    console.log('$loops', this.$loops)
     if (this.$loops === 1) {
       this.stop()
       this.dispatchEvent({type: WebAudioEvent.SOUND_COMPLETE});
