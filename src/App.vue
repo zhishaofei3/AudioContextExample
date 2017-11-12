@@ -56,7 +56,7 @@
         this.clearInterval()
         this.soundChannel.stop()
       },
-      stop(isStop) {
+      stop() {
         if (!this.soundChannel) {
           return
         }
