@@ -2,12 +2,24 @@ import EventDispatcher from './EventDispatcher'
 import WebAudioDecode from './WebAudioDecode'
 import WebAudioEvent from './WebAudioEvent'
 import WebAudioSoundChannel from './WebAudioSoundChannel'
+import axios from 'axios'
+
+let onSoundLoadSuccess = function () {}
+let onSoundLoadError = function () {}
+let onAudioLoaded = function () {}
+let onAudioDecodeError = function () {}
 
 export default class WebAudioSound extends EventDispatcher {
   audioBuffer = null//AudioBuffer
+  CancelToken = null
 
   constructor() {
     super()
+    this.CancelToken = axios.CancelToken
+    onSoundLoadSuccess = this.onSoundLoadSuccess.bind(this)
+    onSoundLoadError = this.onSoundLoadError.bind(this)
+    onAudioLoaded = this.onAudioLoaded.bind(this)
+    onAudioDecodeError = this.onAudioDecodeError.bind(this)
   }
 
   get length() {
@@ -20,38 +32,40 @@ export default class WebAudioSound extends EventDispatcher {
   }
 
   load(url) {
-    let self = this
     this.url = url
+    let source = this.CancelToken.source()
+    axios({
+      method: 'get',
+      url,
+      responseType: 'arraybuffer',
+      timeout: 8000,
+      cancelToken: source.token,
+      source,
+    }).then(onSoundLoadSuccess).catch(onSoundLoadError)
+  }
 
-    let request = new XMLHttpRequest()
-    request.open("GET", url, true)
-    request.responseType = "arraybuffer"
-    request.onreadystatechange = function () {
-      if (request.readyState == 4) {// 4 = "loaded"
-        let ioError = (request.status >= 400 || request.status == 0)
-        if (ioError) {//请求错误
-          self.dispatchEvent({type: WebAudioEvent.IO_ERROR})
-        } else {
-          WebAudioDecode.decodeArr.push({
-            buffer: request.response,
-            success: onAudioLoaded,
-            fail: onAudioError,
-            self: self,
-            url: self.url
-          })
-          WebAudioDecode.decodeAudios()
-        }
-      }
-    }
-    request.send()
-    function onAudioLoaded() {
-      self.loaded = true
-      self.dispatchEvent({type: WebAudioEvent.COMPLETE})
-    }
+  onSoundLoadSuccess(response) {
+    WebAudioDecode.decodeArr.push({
+      buffer: response.data,
+      success: onAudioLoaded,
+      fail: onAudioDecodeError,
+      self: this,
+      url: this.url
+    })
+    WebAudioDecode.decodeAudios()
+  }
 
-    function onAudioError() {
-      self.dispatchEvent({type: WebAudioEvent.IO_ERROR})
-    }
+  onSoundLoadError(error) {
+    this.dispatchEvent({type: WebAudioEvent.IO_ERROR})
+  }
+
+  onAudioLoaded() {
+    this.loaded = true
+    this.dispatchEvent({type: WebAudioEvent.COMPLETE})
+  }
+
+  onAudioDecodeError() {
+    this.dispatchEvent({type: WebAudioEvent.SOUND_DECODE_ERROR})
   }
 
   play(startTime, loops) {

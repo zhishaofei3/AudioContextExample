@@ -37,6 +37,7 @@
         this.sound.load('yihan.mp3')
         this.sound.addEventListener(WebAudioEvent.COMPLETE, this.onSoundLoadComplete)
         this.sound.addEventListener(WebAudioEvent.IO_ERROR, this.onSoundLoadError)
+        this.sound.addEventListener(WebAudioEvent.SOUND_DECODE_ERROR, this.onSoundDecodeError)
       },
       play() {
         if (!this.loaded) {
@@ -67,11 +68,18 @@
       onSoundLoadComplete(e) {
         this.sound.removeEventListener(WebAudioEvent.COMPLETE, this.onSoundLoadComplete)
         this.sound.removeEventListener(WebAudioEvent.IO_ERROR, this.onSoundLoadError)
+        this.sound.removeEventListener(WebAudioEvent.SOUND_DECODE_ERROR, this.onSoundDecodeError)
         this.loaded = true
       },
       onSoundLoadError(e) {
         this.sound.removeEventListener(WebAudioEvent.COMPLETE, this.onSoundLoadComplete)
         this.sound.removeEventListener(WebAudioEvent.IO_ERROR, this.onSoundLoadError)
+        this.sound.removeEventListener(WebAudioEvent.SOUND_DECODE_ERROR, this.onSoundDecodeError)
+      },
+      onSoundDecodeError(e) {
+        this.sound.removeEventListener(WebAudioEvent.COMPLETE, this.onSoundLoadComplete)
+        this.sound.removeEventListener(WebAudioEvent.IO_ERROR, this.onSoundLoadError)
+        this.sound.removeEventListener(WebAudioEvent.SOUND_DECODE_ERROR, this.onSoundDecodeError)
       },
       onSoundComplete(e) {
         this.soundChannel.removeEventListener(WebAudioEvent.SOUND_COMPLETE, this.onSoundComplete)
