@@ -54,7 +54,6 @@
           return
         }
         this.position = this.soundChannel.position
-        this.clearInterval()
         this.soundChannel.stop()
       },
       stop() {
@@ -62,7 +61,6 @@
           return
         }
         this.position = 0
-        this.clearInterval()
         this.soundChannel.stop()
       },
       onSoundLoadComplete(e) {
